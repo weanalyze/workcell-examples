@@ -6,7 +6,7 @@ from workcell.integrations.types import DataFrameOutput
 class DummyInput(BaseModel):
     pass
 
-def economy_events(input: DummyInput) -> DataFrameOutput:
-    """Economic Calendar (openbb.economy.events)"""
-    df = openbb.economy.events()
+def stocks_disc_fipo(input: DummyInput) -> DataFrameOutput:
+    """Future IPO Dates (openbb.stocks.disc.fipo)"""
+    df = openbb.stocks.disc.fipo()
     return DataFrameOutput(data=df)
