@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 from pydantic import BaseModel
 from typing import Literal
-from workcell.integrations.types import PlotOutput
+from workcell.integrations.types import PlotlyPlot
 
 
 METRICS = Literal["Life Expectancy", "Population", "GDP Per Capita"]
@@ -31,10 +31,12 @@ def visualization(dataframe, metric, country):
     return fig    
 
 
-def hello_plot(input: PlotInput) -> PlotOutput:
+def hello_plotly(input: PlotInput) -> PlotlyPlot:
     """A plotly express fig encode in json format."""
     # Step1. load data
     dataframe = load_data()
     # Step2. create plot
     fig = visualization(dataframe, input.metric, input.country)
-    return PlotOutput(data=fig.to_json())
+    # Step3. wrapped by output
+    output = PlotlyPlot(data=fig)
+    return output
