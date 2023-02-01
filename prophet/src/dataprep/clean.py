@@ -2,7 +2,6 @@ from typing import Any, Dict, Tuple
 
 import numpy as np
 import pandas as pd
-import streamlit as st
 
 
 def clean_df(df: pd.DataFrame, cleaning: Dict[Any, Any]) -> pd.DataFrame:
@@ -51,7 +50,6 @@ def clean_future_df(df: pd.DataFrame, cleaning: Dict[Any, Any]) -> pd.DataFrame:
     return df_clean
 
 
-@st.cache(suppress_st_warning=True, ttl=300)
 def _log_transform(df: pd.DataFrame, cleaning: Dict[Any, Any]) -> pd.DataFrame:
     """Applies a log transform to the y column of input dataframe, if possible.
     Raises an error in streamlit dashboard if not possible.
@@ -71,16 +69,12 @@ def _log_transform(df: pd.DataFrame, cleaning: Dict[Any, Any]) -> pd.DataFrame:
     df_clean = df.copy()  # To avoid CachedObjectMutationWarning
     if cleaning["log_transform"]:
         if df_clean.y.min() <= 0:
-            st.error(
-                "The target has values <= 0. Please remove negative and 0 values when applying log transform."
-            )
-            st.stop()
+            raise Exception("The target has values <= 0. Please remove negative and 0 values when applying log transform.")
         else:
             df_clean["y"] = np.log(df_clean["y"])
     return df_clean
 
 
-@st.cache(ttl=300)
 def _remove_rows(df: pd.DataFrame, cleaning: Dict[Any, Any]) -> pd.DataFrame:
     """Removes some rows of the input dataframe according to cleaning dict specifications.
 

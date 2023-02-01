@@ -13,7 +13,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import toml
-from streamlit_prophet.lib.utils.load import get_project_root
+from src.utils.load import get_project_root
 
 
 def get_dataframe_download_link(df: pd.DataFrame, filename: str, linkname: str) -> str:
@@ -109,47 +109,6 @@ def display_dataframe_download_link(
     if add_blank:
         st.write("")
     st.markdown(get_dataframe_download_link(df, filename, linkname), unsafe_allow_html=True)
-
-
-def display_2_dataframe_download_links(
-    df1: pd.DataFrame,
-    filename1: str,
-    linkname1: str,
-    df2: pd.DataFrame,
-    filename2: str,
-    linkname2: str,
-    add_blank: bool = False,
-) -> None:
-    """Displays a link to download a dataframe as a csv file.
-
-    Parameters
-    ----------
-    df1 : pd.DataFrame
-        First dataframe to export.
-    filename1 : str
-        Name of the first exported file.
-    linkname1 : str
-        Text displayed in the streamlit app for the first link.
-    df2 : pd.DataFrame
-        Second dataframe to export.
-    filename2 : str
-        Name of the second exported file.
-    linkname2 : str
-        Text displayed in the streamlit app for the second link.
-    add_blank : str
-        Whether or not to add a blank before the link in streamlit app.
-    """
-    if add_blank:
-        st.write("")
-    col1, col2 = st.columns(2)
-    col1.markdown(
-        f"<p style='text-align: center;;'> {get_dataframe_download_link(df1, filename1, linkname1)}</p>",
-        unsafe_allow_html=True,
-    )
-    col2.markdown(
-        f"<p style='text-align: center;;'> {get_dataframe_download_link(df2, filename2, linkname2)}</p>",
-        unsafe_allow_html=True,
-    )
 
 
 def display_config_download_links(

@@ -21,7 +21,6 @@ def get_project_root() -> str:
     return str(Path(__file__).parent.parent.parent)
 
 
-@st.cache(suppress_st_warning=True, ttl=300)
 def load_dataset(file: str, load_options: Dict[Any, Any]) -> pd.DataFrame:
     """Loads dataset from user's file system as a pandas dataframe.
 
@@ -40,13 +39,10 @@ def load_dataset(file: str, load_options: Dict[Any, Any]) -> pd.DataFrame:
     try:
         return pd.read_csv(file, sep=load_options["separator"])
     except:
-        st.error(
-            "This file can't be converted into a dataframe. Please import a csv file with a valid separator."
-        )
-        st.stop()
+        error_msg = "This file can't be converted into a dataframe. Please import a csv file with a valid separator."
+        raise Exception(error_msg)
 
 
-@st.cache(allow_output_mutation=True, ttl=300)
 def load_config(
     config_streamlit_filename: str, config_instructions_filename: str, config_readme_filename: str
 ) -> Tuple[Dict[Any, Any], Dict[Any, Any], Dict[Any, Any]]:
@@ -76,7 +72,6 @@ def load_config(
     return dict(config_streamlit), dict(config_instructions), dict(config_readme)
 
 
-@st.cache(ttl=300)
 def download_toy_dataset(url: str) -> pd.DataFrame:
     """Downloads a toy dataset from an external source and converts it into a pandas dataframe.
 
@@ -95,7 +90,6 @@ def download_toy_dataset(url: str) -> pd.DataFrame:
     return df
 
 
-@st.cache(ttl=300)
 def load_custom_config(config_file: io.BytesIO) -> Dict[Any, Any]:
     """Loads config toml file from user's file system as a dictionary.
 
@@ -130,7 +124,6 @@ def write_bytesio_to_file(filename: str, bytesio: io.BytesIO) -> None:
         outfile.write(bytesio.getbuffer())
 
 
-@st.cache(ttl=300)
 def load_image(image_name: str) -> Image:
     """Displays an image.
 

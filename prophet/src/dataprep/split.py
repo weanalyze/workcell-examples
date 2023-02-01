@@ -4,10 +4,9 @@ import re
 from datetime import datetime, timedelta
 
 import pandas as pd
-import streamlit as st
-from streamlit_prophet.lib.dataprep.clean import clean_future_df
-from streamlit_prophet.lib.dataprep.format import prepare_future_df
-from streamlit_prophet.lib.utils.mapping import convert_into_nb_of_days, convert_into_nb_of_seconds
+from src.dataprep.clean import clean_future_df
+from src.dataprep.format import prepare_future_df
+from src.utils.mapping import convert_into_nb_of_days, convert_into_nb_of_seconds
 
 
 def get_train_val_sets(
@@ -51,13 +50,12 @@ def print_train_val_dates(val: pd.DataFrame, train: pd.DataFrame) -> None:
     train : pd.DataFrame
         Dataframe containing training data.
     """
-    st.success(
-        f"""Train:              \n"""
-        f"""[ {train.ds.min().strftime('%Y/%m/%d')} - {train.ds.max().strftime('%Y/%m/%d')} ]              \n"""
-        f"""Valid:              \n"""
-        f"""[ {val.ds.min().strftime('%Y/%m/%d')} - {val.ds.max().strftime('%Y/%m/%d')} ]              \n"""
-        f"""({round((len(val) / float(len(train) + len(val)) * 100))}% of data used for validation)"""
-    )
+    success_msg = f"""Train:              \n""" \
+                  + f"""[ {train.ds.min().strftime('%Y/%m/%d')} - {train.ds.max().strftime('%Y/%m/%d')} ]              \n""" \
+                  + f"""Valid:              \n""" \
+                  + f"""[ {val.ds.min().strftime('%Y/%m/%d')} - {val.ds.max().strftime('%Y/%m/%d')} ]              \n""" \
+                  + f"""({round((len(val) / float(len(train) + len(val)) * 100))}% of data used for validation)"""
+    print(success_msg)
 
 
 def raise_error_train_val_dates(
@@ -79,28 +77,24 @@ def raise_error_train_val_dates(
     threshold_train = config["validity"]["min_data_points_train"]
     threshold_val = config["validity"]["min_data_points_val"]
     if dates["train_end_date"] >= dates["val_start_date"]:
-        st.error(f"Training end date should be before validation start date.")
-        st.stop()
+        error_msg = f"Training end date should be before validation start date."
+        raise Exception(error_msg)
     if dates["val_start_date"] >= dates["val_end_date"]:
-        st.error(f"Validation start date should be before validation end date.")
-        st.stop()
+        error_msg = f"Validation start date should be before validation end date."
+        raise Exception(error_msg)        
     if dates["train_start_date"] >= dates["train_end_date"]:
-        st.error(f"Training start date should be before training end date.")
-        st.stop()
+        error_msg = f"Training start date should be before training end date."
+        raise Exception(error_msg)             
     if len(val) <= threshold_val:
-        st.error(
-            f"There are less than {threshold_val + 1} data points in validation set ({len(val)}), "
-            f"please expand validation period or change the dataset frequency. "
-            f"If you wish to train a model on the whole dataset and forecast on future dates, "
-            f"please go to the 'Forecast' section at the bottom of the sidebar."
-        )
-        st.stop()
+        error_msg = f"There are less than {threshold_val + 1} data points in validation set ({len(val)}), " \
+                    + f"please expand validation period or change the dataset frequency. " \
+                    + f"If you wish to train a model on the whole dataset and forecast on future dates, " \
+                    + f"please go to the 'Forecast' section at the bottom of the sidebar."
+        raise Exception(error_msg)            
     if len(train) <= threshold_train:
-        st.error(
-            f"There are less than {threshold_train + 1} data points in training set ({len(train)}), "
-            f"please expand training period or change the dataset frequency."
-        )
-        st.stop()
+        error_msg = f"There are less than {threshold_train + 1} data points in training set ({len(train)}), " \
+                    + f"please expand training period or change the dataset frequency."
+        raise Exception(error_msg)           
 
 
 def get_train_set(
@@ -338,7 +332,8 @@ def print_cv_folds_dates(dates: Dict[Any, Any], freq: str) -> None:
                     .strftime('%Y/%m/%d')} ]              \n"""
             )
         cutoffs_text.append("")
-    st.success("\n".join(cutoffs_text))
+    success_msg = "\n".join(cutoffs_text)
+    print(success_msg)
 
 
 def raise_error_cv_dates(
@@ -365,17 +360,13 @@ def raise_error_cv_dates(
         pd.date_range(start=dates["train_start_date"], end=min(dates["cutoffs"]), freq=freq)
     )
     if n_data_points_val <= threshold_val:
-        st.error(
-            f"Some folds' valid sets have less than {threshold_val + 1} data points ({n_data_points_val}), "
-            f"please increase folds' horizon or change the dataset frequency or expand CV period."
-        )
-        st.stop()
+        error_msg = f"Some folds' valid sets have less than {threshold_val + 1} data points ({n_data_points_val}), " \
+                    + f"please increase folds' horizon or change the dataset frequency or expand CV period."
+        raise Exception(error_msg)              
     elif n_data_points_train <= threshold_train:
-        st.error(
-            f"Some folds' train sets have less than {threshold_train + 1} data points ({n_data_points_train}), "
-            f"please increase folds' horizon or change the dataset frequency or expand CV period."
-        )
-        st.stop()
+        error_msg = f"Some folds' train sets have less than {threshold_train + 1} data points ({n_data_points_train}), " \
+                    + f"please increase folds' horizon or change the dataset frequency or expand CV period."
+        raise Exception(error_msg)              
 
 
 def print_forecast_dates(dates: Dict[Any, Any], resampling: Dict[Any, Any]) -> None:
@@ -389,14 +380,10 @@ def print_forecast_dates(dates: Dict[Any, Any], resampling: Dict[Any, Any]) -> N
         Dictionary containing dataset frequency information.
     """
     if resampling["freq"][-1] in ["s", "H"]:
-        st.success(
-            f"""Forecast:              \n"""
-            f"""{dates['forecast_start_date'].strftime('%Y/%m/%d %H:%M:%S')} -
-                {dates['forecast_end_date'].strftime('%Y/%m/%d %H:%M:%S')}"""
-        )
+        success_msg = f"""Forecast:              \n""" \
+                      + f"""{dates['forecast_start_date'].strftime('%Y/%m/%d %H:%M:%S')} - {dates['forecast_end_date'].strftime('%Y/%m/%d %H:%M:%S')}"""
+        print(success_msg)
     else:
-        st.success(
-            f"""Forecast:              \n"""
-            f"""{dates['forecast_start_date'].strftime('%Y/%m/%d')} -
-                {dates['forecast_end_date'].strftime('%Y/%m/%d')}"""
-        )
+        success_msg = f"""Forecast:              \n""" \
+                      + f"""{dates['forecast_start_date'].strftime('%Y/%m/%d')} - {dates['forecast_end_date'].strftime('%Y/%m/%d')}"""
+        print(success_msg)

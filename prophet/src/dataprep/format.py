@@ -2,10 +2,8 @@ from typing import Any, Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
-import streamlit as st
 
 
-@st.cache(ttl=300)
 def remove_empty_cols(df: pd.DataFrame) -> Tuple[pd.DataFrame, List[Any]]:
     """Remove columns with strictly less than 2 distinct values in input dataframe.
 
@@ -36,13 +34,11 @@ def print_empty_cols(empty_cols: List[Any]) -> None:
     """
     L = len(empty_cols)
     if L > 0:
-        st.error(
-            f'The following column{"s" if L > 1 else ""} ha{"ve" if L > 1 else "s"} been removed because '
-            f'{"they have" if L > 1 else "it has"} <= 1 distinct values: {", ".join(empty_cols)}'
-        )
+        warning_msg = f'The following column{"s" if L > 1 else ""} ha{"ve" if L > 1 else "s"} been removed because ' \
+        + f'{"they have" if L > 1 else "it has"} <= 1 distinct values: {", ".join(empty_cols)}'
+        print(warning_msg)
 
 
-@st.cache(suppress_st_warning=True, ttl=300)
 def format_date_and_target(
     df_input: pd.DataFrame,
     date_col: str,
@@ -108,16 +104,12 @@ def _format_date(
         days_range = (df[date_col].max() - df[date_col].min()).days
         sec_range = (df[date_col].max() - df[date_col].min()).seconds
         if ((days_range < 1) & (sec_range < 1)) | (np.isnan(days_range) & np.isnan(sec_range)):
-            st.error(
-                "Please select the correct date column (selected column has a time range < 1s)."
-            )
-            st.stop()
+            error_msg = "Please select the correct date column (selected column has a time range < 1s)."
+            raise Exception(error_msg)
         return df
     except:
-        st.error(
-            "Please select a valid date format (selected column can't be converted into date)."
-        )
-        st.stop()
+        error_msg = "Please select a valid date format (selected column can't be converted into date)."
+        raise Exception(error_msg)        
 
 
 def __check_date_format(date_series: pd.Series) -> bool:
@@ -160,14 +152,12 @@ def _format_target(df: pd.DataFrame, target_col: str, config: Dict[Any, Any]) ->
     try:
         df[target_col] = df[target_col].astype("float")
         if df[target_col].nunique() < config["validity"]["min_target_cardinality"]:
-            st.error(
-                "Please select the correct target column (should be numerical, not categorical)."
-            )
-            st.stop()
+            error_msg = "Please select the correct target column (should be numerical, not categorical)."
+            raise Exception(error_msg)                 
         return df
     except:
-        st.error("Please select the correct target column (should be of type int or float).")
-        st.stop()
+        error_msg = "Please select the correct target column (should be of type int or float)."
+        raise Exception(error_msg)               
 
 
 def _rename_cols(df: pd.DataFrame, date_col: str, target_col: str) -> pd.DataFrame:
@@ -196,7 +186,6 @@ def _rename_cols(df: pd.DataFrame, date_col: str, target_col: str) -> pd.DataFra
 
 
 # NB: date_col and target_col not used, only added to avoid unexpected caching when their values change
-@st.cache(ttl=300)
 def filter_and_aggregate_df(
     df_input: pd.DataFrame,
     dimensions: Dict[Any, Any],
@@ -316,11 +305,10 @@ def print_removed_cols(cols_removed: List[Any]) -> None:
     """
     L = len(cols_removed)
     if L > 0:
-        st.error(
-            f'The following column{"s" if L > 1 else ""} ha{"ve" if L > 1 else "s"} been removed because '
-            f'{"they are" if L > 1 else "it is"} neither the target, '
-            f'nor a dimension, nor a potential regressor: {", ".join(cols_removed)}'
-        )
+        warning_msg = f'The following column{"s" if L > 1 else ""} ha{"ve" if L > 1 else "s"} been removed because ' \
+                    + f'{"they are" if L > 1 else "it is"} neither the target, ' \
+                    + f'nor a dimension, nor a potential regressor: {", ".join(cols_removed)}' 
+        print(warning_msg)
 
 
 def _aggregate(df: pd.DataFrame, dimensions: Dict[Any, Any]) -> pd.DataFrame:
@@ -344,7 +332,6 @@ def _aggregate(df: pd.DataFrame, dimensions: Dict[Any, Any]) -> pd.DataFrame:
     return df.groupby("ds").agg(agg_dict).reset_index()
 
 
-@st.cache(ttl=300)
 def format_datetime(df_input: pd.DataFrame, resampling: Dict[Any, Any]) -> pd.DataFrame:
     """Formats date column to datetime in input dataframe.
 
@@ -367,7 +354,6 @@ def format_datetime(df_input: pd.DataFrame, resampling: Dict[Any, Any]) -> pd.Da
     return df
 
 
-@st.cache(ttl=300)
 def resample_df(df_input: pd.DataFrame, resampling: Dict[Any, Any]) -> pd.DataFrame:
     """Resamples input dataframe according to resampling dictionary specifications.
 
@@ -406,11 +392,9 @@ def check_dataset_size(df: pd.DataFrame, config: Dict[Any, Any]) -> None:
         len(df)
         <= config["validity"]["min_data_points_train"] + config["validity"]["min_data_points_val"]
     ):
-        st.error(
-            f"The dataset has not enough data points ({len(df)} data points only) to make a forecast. "
-            f"Please resample with a higher frequency or change cleaning options."
-        )
-        st.stop()
+        error_msg = f"The dataset has not enough data points ({len(df)} data points only) to make a forecast. " \
+                    + f"Please resample with a higher frequency or change cleaning options."
+        raise Exception(error_msg)
 
 
 def check_future_regressors_df(
@@ -447,10 +431,9 @@ def check_future_regressors_df(
     if "future_regressors" in datasets.keys():
         # Check date column
         if date_col not in datasets["future_regressors"].columns:
-            st.error(
-                f"Date column '{date_col}' not found in the dataset provided for future regressors."
-            )
-            st.stop()
+            error_msg = f"Date column '{date_col}' not found in the dataset provided for future regressors."
+            raise Exception(error_msg)
+
         # Check number of distinct dates
         N_dates_input = datasets["future_regressors"][date_col].nunique()
         N_dates_expected = len(
@@ -461,43 +444,37 @@ def check_future_regressors_df(
             )
         )
         if N_dates_input != N_dates_expected:
-            st.error(
-                f"The dataset provided for future regressors has the right number of distinct dates "
-                f"(expected {N_dates_expected}, found {N_dates_input}). "
-                f"Please make sure that the date column goes from {dates['forecast_start_date'].strftime('%Y-%m-%d')} "
-                f"to {dates['forecast_end_date'].strftime('%Y-%m-%d')} at frequency {resampling['freq']} "
-                f"without skipping any date in this range."
-            )
-            st.stop()
+            error_msg = f"The dataset provided for future regressors has the right number of distinct dates " \
+                        + f"(expected {N_dates_expected}, found {N_dates_input}). " \
+                        + f"Please make sure that the date column goes from {dates['forecast_start_date'].strftime('%Y-%m-%d')} " \
+                        + f"to {dates['forecast_end_date'].strftime('%Y-%m-%d')} at frequency {resampling['freq']} " \
+                        + f"without skipping any date in this range."
+            raise Exception(error_msg)            
         # Check regressors
         regressors_expected = set(params["regressors"].keys())
         input_cols = set(datasets["future_regressors"])
         if len(input_cols.intersection(regressors_expected)) != len(regressors_expected):
             missing_regressors = [reg for reg in regressors_expected if reg not in input_cols]
             if len(missing_regressors) > 1:
-                st.error(
-                    f"Columns {', '.join(missing_regressors[:-1])} and {missing_regressors[-1]} are missing "
-                    f"in the dataset provided for future regressors."
-                )
+                warning_msg = f"Columns {', '.join(missing_regressors[:-1])} and {missing_regressors[-1]} are missing " \
+                              + f"in the dataset provided for future regressors."
+                print(warning_msg)
             else:
-                st.error(
-                    f"Column {missing_regressors[0]} is missing in the dataset provided for future regressors."
-                )
-            st.stop()
+                warning_msg = f"Column {missing_regressors[0]} is missing in the dataset provided for future regressors."
+                print(warning_msg)
+            raise
         # Check dimensions
         dim_expected = {dim for dim in dimensions.keys() if dim != "agg"}
         if len(input_cols.intersection(dim_expected)) != len(dim_expected):
             missing_dim = [dim for dim in dim_expected if dim not in input_cols]
             if len(missing_dim) > 1:
-                st.error(
-                    f"Dimension columns {', '.join(missing_dim[:-1])} and {missing_dim[-1]} are missing "
-                    f"in the dataset provided for future regressors."
-                )
+                warning_msg = f"Dimension columns {', '.join(missing_dim[:-1])} and {missing_dim[-1]} are missing " \
+                              + f"in the dataset provided for future regressors."
+                print(warning_msg)
             else:
-                st.error(
-                    f"Dimension column {missing_dim[0]} is missing in the dataset provided for future regressors."
-                )
-            st.stop()
+                warning_msg = f"Dimension column {missing_dim[0]} is missing in the dataset provided for future regressors."
+                print(warning_msg)
+            raise
         use_regressors = True
     return use_regressors
 
@@ -565,7 +542,6 @@ def prepare_future_df(
     return future, datasets
 
 
-@st.cache(ttl=300)
 def add_cap_and_floor_cols(df_input: pd.DataFrame, params: Dict[Any, Any]) -> pd.DataFrame:
     """Resamples input dataframe according to resampling dictionary specifications.
 

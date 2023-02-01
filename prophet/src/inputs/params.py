@@ -2,8 +2,8 @@ from typing import Any, Dict, List
 
 import pandas as pd
 import streamlit as st
-from streamlit_prophet.lib.utils.holidays import lockdown_format_func
-from streamlit_prophet.lib.utils.mapping import (
+from src.utils.holidays import lockdown_format_func
+from src.utils.mapping import (
     COUNTRY_NAMES_MAPPING,
     COVID_LOCKDOWN_DATES_MAPPING,
     SCHOOL_HOLIDAYS_FUNC_MAPPING,
