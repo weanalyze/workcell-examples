@@ -6,7 +6,7 @@ import gurobipy as gp
 import plotly.express as px
 from itertools import combinations
 from pydantic import BaseModel
-from workcell.integrations.types import PlotOutput
+from workcell.integrations.types import PlotlyPlot as PlotlyExpressPlot
 
 
 # Callback - use lazy constraints to eliminate sub-tours
@@ -104,7 +104,7 @@ class Input(BaseModel):
 
 class Output(BaseModel):
     plan: Dict # plan cost
-    plot: PlotOutput # plotly plot
+    plot: PlotlyExpressPlot # plotly plot
 
 def gurobi_tsp(input: Input) -> Output:
     # Create n random points
@@ -121,7 +121,7 @@ def gurobi_tsp(input: Input) -> Output:
     # Output
     output = Output(
         plan=plan_tour,
-        plot=PlotOutput(data=fig.to_json())
+        plot=PlotlyExpressPlot(data=fig.to_json())
     )
     return output
 
