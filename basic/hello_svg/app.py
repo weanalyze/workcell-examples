@@ -11,3 +11,6 @@ def show_svg(input: DummyInput) -> SVG:
     svg = requests.get(svg_url).text
     output = SVG(data=svg)
     return output
+
+import workcell
+app = workcell.create_app(show_svg)

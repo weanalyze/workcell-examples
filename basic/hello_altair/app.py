@@ -68,7 +68,11 @@ class DummyInput(BaseModel):
     pass
 
 def hello_altair(input: DummyInput) -> AltairPlot:
+    """Returns the altair plot."""
     chart = plot_london_tube_lines()
     # export chart
     output = AltairPlot(data=chart)
     return output
+
+import workcell
+app = workcell.create_app(hello_altair)

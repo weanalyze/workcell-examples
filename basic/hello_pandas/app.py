@@ -12,3 +12,6 @@ def hello_pandas(input: DummyInput) -> PandasDataFrame:
     df = pd.DataFrame(data=d)
     output = PandasDataFrame(data=df)
     return output
+
+import workcell
+app = workcell.create_app(hello_pandas)

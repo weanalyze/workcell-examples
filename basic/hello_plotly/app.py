@@ -40,3 +40,6 @@ def hello_plotly(input: PlotInput) -> PlotlyPlot:
     # Step3. wrapped by output
     output = PlotlyPlot(data=fig)
     return output
+
+import workcell
+app = workcell.create_app(hello_plotly)

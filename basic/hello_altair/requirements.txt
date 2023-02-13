@@ -1,2 +1,3 @@
+workcell
 altair
 vega-datasets
