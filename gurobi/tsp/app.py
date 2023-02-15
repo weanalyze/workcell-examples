@@ -1,4 +1,5 @@
 # TSP, Travelling salesman problem
+import json
 import math
 import random
 from typing import Dict
@@ -125,5 +126,3 @@ def gurobi_tsp(input: Input) -> Output:
         plot=PlotlyPlot(data=fig)
     )
     return output
-
-
