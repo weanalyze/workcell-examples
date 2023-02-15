@@ -1,12 +1,14 @@
 from openbb_terminal.sdk import openbb
 from pydantic import BaseModel
-from workcell.integrations.types import DataFrameOutput
+import pandas as pd
+from workcell.integrations.types import PerspectiveTable
 
 
 class DummyInput(BaseModel):
     pass
 
-def stocks_disc_fipo(input: DummyInput) -> DataFrameOutput:
+def stocks_disc_fipo(input: DummyInput) -> PerspectiveTable:
     """Future IPO Dates (openbb.stocks.disc.fipo)"""
-    df = openbb.stocks.disc.fipo()
-    return DataFrameOutput(data=df)
+    df = pd.DataFrame(openbb.stocks.disc.fipo())
+    output = PerspectiveTable(data=df)
+    return output

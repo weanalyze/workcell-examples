@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 from pydantic import BaseModel
 from typing import Literal
-from workcell.integrations.types import PlotlyPlot
+from workcell.integrations.types import MatplotlibPlot
 
 
 METRICS = Literal["Life Expectancy", "Population", "GDP Per Capita"]
@@ -40,3 +40,6 @@ def hello_plotly(input: PlotInput) -> PlotlyPlot:
     # Step3. wrapped by output
     output = PlotlyPlot(data=fig)
     return output
+
+import workcell
+app = workcell.create_app(hello_plotly)

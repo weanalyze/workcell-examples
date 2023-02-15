@@ -7,10 +7,8 @@ class DummyInput(BaseModel):
     pass
 
 def show_svg(input: DummyInput) -> SVG:
+    """Show image in svg format."""
     svg_url = "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
     svg = requests.get(svg_url).text
     output = SVG(data=svg)
     return output
-
-import workcell
-app = workcell.create_app(show_svg)

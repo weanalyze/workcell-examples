@@ -11,6 +11,3 @@ def hello_perspective(input: DummyInput) -> PerspectiveTable:
     df = pd.DataFrame(data=d)
     output = PerspectiveTable(data=df)
     return output
-
-import workcell
-app = workcell.create_app(hello_perspective)

@@ -73,6 +73,3 @@ def hello_altair(input: DummyInput) -> AltairPlot:
     # export chart
     output = AltairPlot(data=chart)
     return output
-
-import workcell
-app = workcell.create_app(hello_altair)
